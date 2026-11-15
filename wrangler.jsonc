@@ -1,0 +1,7 @@
+{
+  "name": "otlobhaasra3",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-11-01",
+  "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": ["/api/*"] },
+  "kv_namespaces": [{ "binding": "DB", "id": "38da678d1b064a50a2e57a5e7eade0b5" }]
+}
