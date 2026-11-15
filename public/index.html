@@ -21,7 +21,7 @@
 :root[data-theme="dark"]{--bg:#10151a;--sf:#1a2128;--ink:#e8edf1;--mut:#97a4af;--ln:#2b353e;--wa:#25c26a;--wt:#04210f}
 *{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:Cairo,system-ui,sans-serif;font-size:15px;padding-bottom:180px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Cairo,system-ui,sans-serif;font-size:15px;padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
 main{max-width:640px;margin:auto;padding:14px}
 h1{font-size:26px;font-weight:800;margin:6px 0 4px;line-height:1.3}
@@ -39,8 +39,8 @@ h1{font-size:26px;font-weight:800;margin:6px 0 4px;line-height:1.3}
 .form h2{font-size:17px;margin:0 0 10px}
 .form input,.form textarea{width:100%;font:inherit;padding:10px;border:1px solid var(--ln);border-radius:9px;background:var(--bg);color:var(--ink);margin-bottom:8px}
 :focus-visible{outline:2px solid var(--wa);outline-offset:2px}
-.bar{position:fixed;left:0;right:0;bottom:0;background:var(--sf);border-top:1px solid var(--ln);padding:10px 14px calc(72px + env(safe-area-inset-bottom,0px));display:flex;gap:12px;align-items:center;z-index:5}
-.bar div{flex:1}.bar small{color:var(--mut)}.bar b{font-size:19px;display:block}
+.bar{position:fixed;left:12px;right:12px;bottom:calc(42px + env(safe-area-inset-bottom,0px));max-width:616px;margin:0 auto;background:var(--sf);border:1.5px solid var(--wa);border-radius:16px;padding:10px 14px;box-shadow:0 8px 30px rgba(0,0,0,.18);z-index:5}
+.bar-main{display:flex;gap:10px;align-items:center}.bar-main>div{flex:1;min-width:0}.bar small{color:var(--mut)}.bar b{font-size:19px;display:block}
 .go{background:var(--wa);color:var(--wt);border:0;border-radius:11px;padding:12px 16px;font:inherit;font-weight:800;cursor:pointer}
 .err{color:#b91c1c;font-size:13px;min-height:18px}
 .pr s{opacity:.6;margin-inline-end:6px}
@@ -68,14 +68,46 @@ h1{font-size:26px;font-weight:800;margin:6px 0 4px;line-height:1.3}
 .sgb0{width:100%;font:inherit;font-weight:800;padding:12px;border-radius:10px;border:1px solid var(--wa);background:var(--sf);color:var(--wa);cursor:pointer}
 .sgc{background:var(--sf);border:1px solid var(--ln);border-radius:10px;padding:10px 12px;margin-top:8px;line-height:1.8;font-size:14px}
 .sgc button{margin-top:6px;font:inherit;font-weight:800;padding:9px 14px;border-radius:9px;border:0;background:var(--wa);color:var(--wt);cursor:pointer}
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.thm{flex:none;width:38px;height:38px;border-radius:10px;border:1px solid var(--ln);background:var(--sf);color:var(--ink);font-size:16px;cursor:pointer}
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
+.tier{background:var(--bg);border:1px solid var(--ln);border-radius:8px;padding:6px 4px;text-align:center;font-size:12px;line-height:1.5;font-weight:400}
+.tier b{display:block;font-size:15px;color:var(--wa)}
+.tier.act{border-color:var(--wa);background:rgba(18,140,74,.1)}
+.p.on{background:rgba(18,140,74,.08)}
+.sub-item{white-space:nowrap;font-size:11.5px;color:var(--ink);background:var(--bg);border:1px solid var(--ln);padding:1px 6px;border-radius:6px;margin-inline-start:6px}
+.sw{position:relative}.sw input{padding-left:38px}
+#q::-webkit-search-cancel-button{display:none}
+.clrq{position:absolute;left:8px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;border:0;background:var(--ln);color:var(--ink);font-size:12px;cursor:pointer;display:none}
+.clrq.show{display:block}
+.pbg{height:5px;background:var(--ln);border-radius:99px;overflow:hidden;margin-bottom:8px}
+.pfill{height:100%;width:0;background:var(--wa);border-radius:99px;transition:width .3s}
+.cartb{position:relative;flex:none;width:46px;height:46px;border-radius:12px;border:1.5px solid var(--wa);background:var(--sf);font-size:20px;cursor:pointer;padding:0}
+.cartb span{position:absolute;top:-7px;left:-7px;min-width:20px;height:20px;border-radius:10px;background:var(--wa);color:var(--wt);font-size:11px;font-weight:800;display:grid;place-items:center;padding:0 4px}
+.cs{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:30;display:flex;align-items:flex-end;justify-content:center}
+.cs[hidden]{display:none}
+.csb{background:var(--sf);color:var(--ink);width:100%;max-width:640px;max-height:82vh;overflow:auto;border-radius:18px 18px 0 0;padding:14px 14px calc(16px + env(safe-area-inset-bottom,0px))}
+.csh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.csh h2{font-size:18px;margin:0}
+.csx{width:34px;height:34px;border-radius:50%;border:0;background:var(--ln);color:var(--ink);cursor:pointer}
+.ci{display:flex;align-items:center;gap:8px;justify-content:space-between;border-bottom:1px solid var(--ln);padding:10px 0}
+.ci .t{flex:1;min-width:0}.ci .t b{display:block;font-size:14px;line-height:1.4}.ci .t small{color:var(--mut)}
+.ci .ct{display:flex;align-items:center;gap:4px;flex:none}
+.ci .ct button{width:32px;height:32px;border-radius:8px;border:1px solid var(--ln);background:var(--bg);color:var(--ink);font-size:18px;cursor:pointer}
+.ci .ct span{min-width:24px;text-align:center;font-weight:800}
+.ci .ct .dl{border:0;background:none;font-size:16px}
+.cst{margin-top:10px;line-height:1.9;font-size:14px}.cst .r{display:flex;justify-content:space-between}.cst .g{font-weight:800;font-size:16px;color:var(--wa)}
+.csf{display:flex;gap:8px;margin-top:12px}
+.csf button{flex:1;font:inherit;font-weight:800;padding:12px;border-radius:12px;border:1px solid var(--ln);cursor:pointer}
+.csc{background:var(--bg);color:var(--ink)}.csg{background:var(--wa);color:var(--wt);border-color:var(--wa)!important}
+.empty{text-align:center;color:var(--mut);padding:24px 0}
 </style>
 </head>
 <body>
 <main>
-<h1>اطلب منتجاتك مباشرة</h1>
-<p class="sub">اختار الكمية اللي عايزها، واكتب بياناتك، وابعت الطلب على واتساب.</p>
-<div class="info"><b>خصم 20% على كل المنتجات · 25% لو طلبك 1000 ج · 30% لو 2000 ج</b><br>التوصيل 30 ج داخل القاهرة والجيزة خلال نفس اليوم<br>الدفع عند الاستلام<br>لو الطلب ماتستلمش، بتتحمل مصاريف الشحن</div>
-<div class="fl"><input id="q" type="search" placeholder="🔍 دوّر على منتج..." autocomplete="off"><div class="chips" id="chips"></div></div>
+<div class="hdr"><div><h1>اطلب منتجاتك مباشرة</h1>
+<p class="sub">اختار الكمية اللي عايزها، واكتب بياناتك، وابعت الطلب على واتساب.</p></div><button type="button" class="thm" id="thm" aria-label="تغيير المظهر">🌓</button></div>
+<div class="info"><div class="tiers"><div class="tier act" id="t20"><b>خصم 20%</b>على كل المنتجات</div><div class="tier" id="t25"><b>خصم 25%</b>لو طلبك 1000 ج</div><div class="tier" id="t30"><b>خصم 30%</b>لو طلبك 2000 ج</div></div>التوصيل 30 ج داخل القاهرة والجيزة خلال نفس اليوم<br>الدفع عند الاستلام<br>لو الطلب ماتستلمش، بتتحمل مصاريف الشحن</div>
+<div class="fl"><div class="sw"><input id="q" type="search" placeholder="🔍 دوّر على منتج..." autocomplete="off"><button type="button" class="clrq" id="clrq" aria-label="مسح البحث">✕</button></div><div class="chips" id="chips"></div></div>
 <div class="nr" id="nr" hidden>مفيش منتجات بالاسم ده</div>
 <div id="list"></div>
 <div class="sg"><button type="button" class="sgb0" id="sgb">💡 اقترح لي منتجات توصّلني لخصم أعلى</button><div id="sgo"></div></div>
@@ -96,7 +128,8 @@ h1{font-size:26px;font-weight:800;margin:6px 0 4px;line-height:1.3}
 <div class="err" id="se"></div>
 <div class="row"><button type="button" class="x" id="sx">إلغاء</button><button type="button" class="ok" id="so">كمّل على واتساب</button></div>
 </div></div>
-<div class="bar"><div><small>إجمالي المنتجات بعد الخصم (+ 30 ج توصيل)</small><b id="tot">0 ج</b><small id="nd" style="color:var(--wa)"></small></div><button class="go" id="go">ابعت على واتساب</button></div>
+<div class="cs" id="cs" hidden><div class="csb" role="dialog" aria-modal="true"><div class="csh"><h2>🛒 سلتك</h2><button type="button" class="csx" id="csx" aria-label="إغلاق">✕</button></div><div id="csl"></div><div class="cst" id="cst"></div><div class="csf"><button type="button" class="csc" id="csc">كمّل تسوّق</button><button type="button" class="csg" id="csg">ابعت على واتساب</button></div></div></div>
+<div class="bar"><div class="pbg"><div class="pfill" id="pfill"></div></div><div class="bar-main"><div><small>إجمالي المنتجات بعد الخصم (+ 30 ج توصيل)</small><b id="tot">0 ج</b><small id="nd" style="color:var(--wa)"></small></div><button type="button" class="cartb" id="cartb" aria-label="ملخص السلة">🛒<span id="cc">0</span></button><button class="go" id="go">ابعت على واتساب</button></div></div>
 <script>
 /* أرقام واتساب: غيّر الأرقام هنا (كود الدولة بدون + ولا أصفار، مثال مصر: 2010...). كل رقم له لينك: الصفحة#a أو #b أو #c */
 var SELLERS={a:{tel:"201159117447"},b:{tel:"201159117447"},c:{tel:"201159117447"}};
@@ -210,6 +243,35 @@ o.innerHTML=h}
 $("sgb").onclick=function(){off=0;sug()};
 $("sgo").addEventListener("click",function(e){var b=e.target.closest("button");if(b&&b.dataset.more){sug(1);return}if(!b||!b.dataset.add)return;
 b.dataset.add.split(",").forEach(function(p){var a=p.split(":");set(+a[0],(Q[a[0]]||0)+(+a[1]))});off=0;sug();$("tot").scrollIntoView({block:"center",behavior:"smooth"})})})();
+</script>
+<script>
+(function(){var $=function(i){return document.getElementById(i)},_t=tot;
+tot=function(){var d=_t(),L=lt(),r=rate(L);
+$("pfill").style.width=(L>=2000?100:L>=1000?50+(L-1000)/10:L/20)+"%";
+[["t20",.2],["t25",.25],["t30",.3]].forEach(function(x){$(x[0]).classList.toggle("act",Math.abs(r-x[1])<.001)});
+Object.keys(Q).forEach(function(i){var n=Math.round(P[i][2]*(1-r));$("pr"+i).insertAdjacentHTML("beforeend",'<span class="sub-item">'+Q[i]+" × "+f(n)+" = "+f(Q[i]*n)+" ج</span>")});
+return d};tot();
+$("thm").onclick=function(){var h=document.documentElement,dk=h.getAttribute("data-theme")==="dark"||(!h.hasAttribute("data-theme")&&matchMedia("(prefers-color-scheme:dark)").matches);h.setAttribute("data-theme",dk?"light":"dark")};
+$("q").addEventListener("input",function(){$("clrq").classList.toggle("show",!!this.value)});
+$("clrq").onclick=function(){$("q").value="";$("q").dispatchEvent(new Event("input"));$("q").focus()}})();
+</script>
+<script>
+(function(){var $=function(i){return document.getElementById(i)},_t=tot;
+function open(){return !$("cs").hidden}
+function draw(){var ks=Object.keys(Q),L=lt(),r=rate(L),n=0;ks.forEach(function(i){n+=Q[i]});$("cc").textContent=n;
+if(!open())return;
+if(!ks.length){$("csl").innerHTML='<div class="empty">السلة فاضية. اختار منتجات من القايمة.</div>';$("cst").innerHTML="";$("csg").disabled=true;return}
+$("csg").disabled=false;
+$("csl").innerHTML=ks.map(function(i){var u=Math.round(P[i][2]*(1-r));return'<div class="ci"><div class="t"><b>'+esc(P[i][1])+'</b><small>'+f(u)+" ج × "+Q[i]+" = "+f(u*Q[i])+' ج</small></div><div class="ct"><button type="button" data-m="'+i+'" aria-label="نقص">−</button><span>'+Q[i]+'</span><button type="button" data-p="'+i+'" aria-label="زوّد">+</button><button type="button" class="dl" data-del="'+i+'" aria-label="شيل">🗑</button></div></div>'}).join("");
+var net=Math.round(L*(1-r));
+$("cst").innerHTML='<div class="r"><span>بسعر القائمة</span><span>'+f(L)+' ج</span></div><div class="r"><span>الخصم '+Math.round(r*100)+'%</span><span>-'+f(L-net)+' ج</span></div><div class="r"><span>التوصيل</span><span>30 ج</span></div><div class="r g"><span>المطلوب عند الاستلام</span><span>'+f(net+30)+' ج</span></div>'}
+tot=function(){var d=_t();draw();return d};draw();
+$("cartb").onclick=function(){$("cs").hidden=false;draw()};
+function close(){$("cs").hidden=true}
+$("csx").onclick=close;$("csc").onclick=close;
+$("cs").addEventListener("click",function(e){if(e.target===$("cs"))close();var b=e.target.closest("button");if(b&&b.dataset.del!==undefined)set(+b.dataset.del,0)});
+$("csg").onclick=function(){close();$("go").click()};
+addEventListener("keydown",function(e){if(e.key==="Escape")close()})})();
 </script>
 </body>
 </html>
