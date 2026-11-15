@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex"><title>لوحة التحكم</title>
+<style>
+:root{--bg:#eef2f1;--sf:#fff;--ink:#14201e;--mut:#5f706d;--ac:#0f766e;--ac2:#fff;--ln:#d3dcda;--warn:#b45309;--bad:#b91c1c;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1514;--sf:#172120;--ink:#e6efed;--mut:#93a6a2;--ac:#2dd4bf;--ac2:#06201d;--ln:#2a3a38;--warn:#f59e0b;--bad:#f87171}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,"Segoe UI",Tahoma,sans-serif;font-size:15px;padding-bottom:90px}
+h1{font-size:19px;margin:0;padding:10px 14px 6px}
+.tabs{display:flex;position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--ln);z-index:5}
+.tabs button{flex:1;background:none;border:0;border-bottom:3px solid transparent;color:var(--mut);font:inherit;font-weight:600;padding:10px 2px}
+.tabs button.on{color:var(--ac);border-color:var(--ac)}
+main{padding:12px 14px;max-width:720px;margin:auto}
+.big{background:var(--ac);color:var(--ac2);border-radius:14px;padding:16px}.big b{display:block;font-size:32px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.box,.it{background:var(--sf);border:1px solid var(--ln);border-radius:10px;padding:11px;margin-bottom:8px}
+.box small,.m{color:var(--mut);font-size:13px}.box b{display:block;font-size:19px}
+.m{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}
+h2{font-size:14px;color:var(--mut);margin:16px 0 6px}
+input{font:inherit;background:var(--bg);color:var(--ink);border:1px solid var(--ln);border-radius:8px;padding:8px;width:90px;text-align:center}
+input.w{width:100%;text-align:right}
+button.b{background:var(--ac);color:var(--ac2);border:0;border-radius:8px;padding:8px 12px;font:inherit;font-weight:700}
+button.b.x{background:none;color:var(--bad);border:1px solid var(--ln)}
+.low{color:var(--warn);font-weight:700}.zero,.err{color:var(--bad);font-weight:700}
+.foot{position:fixed;bottom:0;left:0;right:0;background:var(--sf);border-top:1px solid var(--ln);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;align-items:center}.foot span{flex:1}
+a{color:var(--ac)}.det{line-height:1.8;margin-top:8px;border-top:1px dashed var(--ln);padding-top:8px}
+</style></head><body><div id="app"></div>
+<script>
+var PW=localStorage.getItem("pw")||"",C=null,O=[],tab="home",dirty=false,msg="";
+var G={shaan:"شان",sero:"سيروبايب",kids:"سوبركيدز"},ST={new:"جديد",confirmed:"مؤكد",delivered:"اتسلّم",cancelled:"ملغي"};
+var $=function(i){return document.getElementById(i)},f=function(n){return Math.round(n).toLocaleString("en-US")};
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function cost(i){return Math.round(C.items[i].l*(1-C.disc/100))}
+async function api(p,b){var r=await fetch("/api/admin/"+p,{method:b?"POST":"GET",headers:{"x-admin":PW,"content-type":"application/json"},body:b?JSON.stringify(b):undefined});
+if(r.status===401){PW="";localStorage.removeItem("pw");login(PW===""&&msg?"كلمة السر غلط":"");throw 0}
+var j=await r.json();if(!r.ok)throw j;return j}
+function login(e){$("app").innerHTML='<main><h1>🔒 لوحة التحكم</h1><div class="box"><input class="w" type="password" id="pw" placeholder="كلمة السر"><p class="err">'+(e||"")+'</p><button class="b" id="go">دخول</button></div></main>';
+$("go").onclick=function(){PW=$("pw").value;msg="x";localStorage.setItem("pw",PW);load()}}
+async function load(){try{var d=await api("data");C=d.cfg;O=d.orders.sort(function(a,b){return b.t-a.t});dirty=false;render()}catch(e){if(e)$("app").innerHTML='<main class="err">تعذّر التحميل: '+esc(e.e||e)+'</main>'}}
+function render(){var T=[["home","الملخص"],["orders","الطلبات"],["stock","المخزون"],["set","الإعدادات"]];
+var h='<h1>لوحة التحكم</h1><div class="tabs">'+T.map(function(t){var n=t[0]==="orders"?O.filter(function(o){return o.s==="new"}).length:0;return'<button data-t="'+t[0]+'" class="'+(tab===t[0]?"on":"")+'">'+t[1]+(n?" ("+n+")":"")+'</button>'}).join("")+'</div><main>'+({home:home,orders:orders,stock:stock,set:sett}[tab])()+'</main>';
+if(tab==="stock"||tab==="set")h+='<div class="foot"><span id="ds">'+(dirty?"فيه تعديلات لسه ما اتحفظتش":"")+'</span><button class="b" id="save">احفظ</button></div>';
+$("app").innerHTML=h}
+function home(){var rev=0,cs=0,n={new:0,confirmed:0,delivered:0,cancelled:0},sv=0;
+O.forEach(function(o){n[o.s]++;if(o.s==="confirmed"||o.s==="delivered"){rev+=o.tot;cs+=o.cost||0}});
+C.items.forEach(function(i,k){sv+=i.q*cost(k)});
+var h='<div class="big"><small>صافي الربح (طلبات مؤكدة ومتسلّمة)</small><b>'+f(rev-cs)+' ج</b><small>مبيعات '+f(rev)+' ج − تكلفة '+f(cs)+' ج</small></div>';
+h+='<div class="g2"><div class="box"><small>طلبات جديدة</small><b>'+n.new+'</b></div><div class="box"><small>مؤكدة / متسلّمة</small><b>'+n.confirmed+" / "+n.delivered+'</b></div><div class="box"><small>قيمة المخزون بسعر الشراء</small><b>'+f(sv)+' ج</b></div><div class="box"><small>ملغية</small><b>'+n.cancelled+'</b></div></div><h2>قربت تخلص</h2>';
+var lo=C.items.filter(function(i){return i.q<=5});
+return h+(lo.length?lo.map(function(i){return'<div class="it">'+esc(i.n)+' <span class="'+(i.q?"low":"zero")+'">'+(i.q?"باقي "+i.q:"خلص")+'</span></div>'}).join(""):'<div class="box">مفيش</div>')+'<p class="m">ملحوظة: الشحن مش داخل في الربح.</p>'}
+function orders(){if(!O.length)return'<div class="box">لسه مفيش طلبات.</div>';
+return O.map(function(o,x){var bt="";
+if(o.s==="new")bt='<button class="b" data-s="confirmed" data-i="'+x+'">تأكيد</button> <button class="b x" data-s="cancelled" data-i="'+x+'">إلغاء</button>';
+else if(o.s==="confirmed")bt='<button class="b" data-s="delivered" data-i="'+x+'">اتسلّم</button> <button class="b x" data-s="cancelled" data-i="'+x+'">إلغاء</button>';
+else if(o.s==="cancelled")bt='<button class="b x" data-s="new" data-i="'+x+'">رجّعه جديد</button>';
+return'<div class="it"><b>'+esc(o.n)+'</b> · '+f(o.tot)+' ج · '+ST[o.s]+'<div class="m"><span>'+new Date(o.t).toLocaleString("ar-EG")+' · '+esc(o.id)+'</span><button class="b x" data-d="'+x+'">تفاصيل</button></div><div class="m">'+bt+'</div><div id="d'+x+'"></div></div>'}).join("")}
+function stock(){return'<p class="m">عدّل الكمية الحالية، وبعدين اضغط «احفظ». الكمية بتنزل لوحدها لما تأكّد طلب.</p>'+C.items.map(function(i,k){return'<div class="it">'+esc(i.n)+' <small class="m">'+G[i.b]+'</small><div class="m"><span>سعر الشراء '+f(cost(k))+' ج</span><label>الكمية <input type="number" min="0" data-q="'+k+'" value="'+i.q+'"></label></div></div>'}).join("")}
+function sett(){return'<div class="box"><small>خصم التاجر عن سعر القايمة % (بيحدد سعر الشراء)</small><input type="number" id="dc" value="'+C.disc+'"></div><div class="box"><small>رقم واتساب (بصيغة 20115...)</small><input class="w" id="wa" value="'+esc(C.wa)+'"></div><div class="box"><small>التوصيل (قريبة / متوسطة / بعيدة)</small><div class="m"><input type="number" data-f="0" value="'+C.fees[0]+'"><input type="number" data-f="1" value="'+C.fees[1]+'"><input type="number" data-f="2" value="'+C.fees[2]+'"></div></div><h2>أسعار القايمة (اللي العميل بيشوفها قبل الخصم)</h2>'+C.items.map(function(i,k){return'<div class="it"><div class="m"><span>'+esc(i.n)+'</span><input type="number" min="0" data-l="'+k+'" value="'+i.l+'"></div></div>'}).join("")+'<p class="m">شرائح الخصم (20/25/30%) مكتوبة في كود الصفحة، مش هنا.</p>'}
+async function det(x){var d=$("d"+x);if(d.innerHTML){d.innerHTML="";return}
+var o=await api("order?k="+encodeURIComponent(O[x].k)),ph=o.phone.replace(/^0/,"20");
+d.innerHTML='<div class="det">'+o.items.map(function(l){return"• "+esc(C.items[l[0]].n)+" × "+l[1]}).join("<br>")+'<br>التوصيل: '+f(o.fee)+' ج ('+esc(o.zone)+')<br>الموبايل: <a href="tel:'+esc(o.phone)+'">'+esc(o.phone)+'</a> · <a href="https://wa.me/'+esc(ph)+'">واتساب</a><br>العنوان: '+esc(o.addr)+(o.loc?' · <a href="https://maps.google.com/?q='+esc(o.loc)+'">الخريطة</a>':"")+(o.note?"<br>ملاحظات: "+esc(o.note):"")+'</div>'}
+document.addEventListener("click",async function(e){var b=e.target.closest("button");if(!b)return;var d=b.dataset;
+try{if(d.t){if(dirty&&!confirm("فيه تعديلات ما اتحفظتش، تكمّل؟"))return;tab=d.t;await load()}
+else if(d.d!==undefined)await det(+d.d);
+else if(d.s){await api("status",{k:O[+d.i].k,s:d.s});await load()}
+else if(b.id==="save"){await api("cfg",C);dirty=false;await load();alert("اتحفظ ✓")}}
+catch(x){if(x&&x.e==="stock")alert("الستوك مش كفاية: "+x.n);else if(x)alert("حصل خطأ: "+(x.e||x))}});
+document.addEventListener("input",function(e){var d=e.target.dataset,v=e.target.value;
+if(d.q!==undefined)C.items[+d.q].q=Math.max(0,Math.floor(+v||0));
+else if(d.l!==undefined)C.items[+d.l].l=Math.max(0,+v||0);
+else if(d.f!==undefined)C.fees[+d.f]=Math.max(0,+v||0);
+else if(e.target.id==="dc")C.disc=Math.min(90,Math.max(0,+v||0));
+else if(e.target.id==="wa")C.wa=v.replace(/\D/g,"");else return;
+dirty=true;if($("ds"))$("ds").textContent="فيه تعديلات لسه ما اتحفظتش"});
+if(PW)load();else login("");
+</script></body></html>
