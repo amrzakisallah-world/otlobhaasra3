@@ -162,6 +162,7 @@ h1{font-size:26px;font-weight:800;margin:6px 0 4px;line-height:1.3}
 <div class="bar"><div class="pbg"><div class="pfill" id="pfill"></div></div><div class="bar-main"><div><small>إجمالي المنتجات بعد الخصم <span id="dl">(+ التوصيل حسب منطقتك)</span></small><b id="tot">0 ج</b><small id="nd" style="color:var(--wa)"></small></div><button type="button" class="cartb" id="cartb" aria-label="سلتك">🛒<span id="cc">0</span></button><button type="button" class="go" id="go">كمّل الطلب</button></div></div>
 <script>
 /* ===== البيانات — الملف ده اللي بتعدّله ===== */
+var API="https://otlobhaasra3.amrzakisallah.workers.dev";
 var WA="201159117447";
 var SELLERS={a:{tel:WA},b:{tel:WA},c:{tel:WA}}; /* الرابط#a أو #b أو #c ممكن يروح لرقم مختلف */
 var ZONES=[
@@ -199,13 +200,13 @@ let Q={};
 /* ===== رسم القايمة ===== */
 const badge=i=>{const s=stk(i);return s===0?'<span class="bd out">خلص</span>':s!=null&&s<=LOW?'<span class="bd">🔥 بيخلص · باقي '+s+'</span>':""};
 const pt=(i,r)=>{const o=OFF[i],b=o||P[i][2];return(o?"سعر باركفيل ":"")+"<s>"+f(b)+"</s> <b>"+f(Math.round(P[i][2]*(1-r)))+" ج</b>"};
-(()=>{let h="";
+function buildList(){let h="";
 Object.keys(B).forEach(g=>{const b=B[g];
 h+=`<div class="brand"><h2 class="bn" style="background:${b.c}">${b.n}</h2><img src="${b.img}" width="${b.w}" height="${b.h}" loading="lazy" decoding="async" alt="منتجات ${b.n}"></div>`;
 P.forEach((p,i)=>{if(p[0]!==g)return;const out=stk(i)===0,d=out?" disabled":"";
 h+=`<div class="p${out?" off":""}" id="p${i}"><div><div class="n">${esc(p[1])}${badge(i)}</div><div class="pr" id="pr${i}"></div></div><div class="st"><button type="button" data-m="${i}" aria-label="نقص"${d}>−</button><input type="number" inputmode="numeric" min="0" max="${cap(i)}" data-q="${i}" placeholder="0" aria-label="الكمية: ${esc(p[1])}"${d}><button type="button" data-p="${i}" aria-label="زوّد"${d}>+</button></div></div>`})});
 $("list").innerHTML=h;
-$("zs").innerHTML=ZONES.map((z,i)=>`<label class="zc"><input type="radio" name="zn" value="${i}"><span><b>${z.t} · ${z.fee} ج</b><small>${z.d}</small></span></label>`).join("")})();
+$("zs").innerHTML=ZONES.map((z,i)=>`<label class="zc"><input type="radio" name="zn" value="${i}"><span><b>${z.t} · ${z.fee} ج</b><small>${z.d}</small></span></label>`).join("")}buildList();
 
 /* ===== الحالة ===== */
 function set(i,v,o){o=o||{};v=Math.max(0,Math.floor(Number(v)||0));const c=cap(i);
@@ -266,6 +267,7 @@ const now=new Date(),same=now.getHours()<DELIVERY.cutoff,id="HS-"+pad(now.getMon
 const L=lt(),r=rate(L),net=Math.round(L*(1-r)),zn=ZONES[+document.querySelector('input[name=zn]:checked').value];
 const m="طلب جديد #"+id+"\n\n"+ks.map(i=>"• "+P[i][1]+" × "+Q[i]+" = "+f(Q[i]*P[i][2])+" ج").join("\n")+"\n\nبسعر القايمة: "+f(L)+" ج\nالخصم "+Math.round(r*100)+"%: -"+f(L-net)+" ج\nثمن المنتجات: "+f(net)+" ج\nالتوصيل: "+dv+" ج\nالمطلوب عند الاستلام: "+f(net+dv)+" ج\n\nالمنطقة: "+zn.t+"\nالاسم: "+nm+"\nالموبايل: "+ph+"\nالعنوان: "+ad+(window.LOC?"\nالموقع على الخريطة: https://maps.google.com/?q="+window.LOC:"")+(nt?"\nملاحظات: "+nt:"")+"\n\nالتوصيل المتوقع: "+(same?"نفس اليوم":"بكرة")+"\nمصدر الطلب: "+ref;
 ls.set("ord-last",JSON.stringify({id,t:Date.now(),tel,same,dl:same?new Date(now.getFullYear(),now.getMonth(),now.getDate(),DELIVERY.end).getTime():0}));showOb();
+try{navigator.sendBeacon(API+"/api/order",new Blob([JSON.stringify({id,items:ks.map(i=>[+i,Q[i]]),fee:dv,zone:zn.t,name:nm,phone:ph,addr:ad,loc:window.LOC||"",note:nt,ref})],{type:"text/plain"}))}catch(e){}
 location.href="https://wa.me/"+tel+"?text="+encodeURIComponent(m)}
 
 /* ===== بيع معانا ===== */
@@ -345,6 +347,13 @@ $("obt").textContent="طلبك رقم "+o.id+" · "+(!o.same?"هيوصل بكر�
 $("oba").href="https://wa.me/"+o.tel+"?text="+encodeURIComponent("بخصوص طلبي رقم "+o.id)}
 $("obn").onclick=()=>{ls.set("ord-last","");Object.keys(Q).forEach(i=>set(+i,0));showOb()};
 setInterval(showOb,30000);addEventListener("pageshow",showOb);document.addEventListener("visibilitychange",showOb);
+/* ===== ربط لوحة التحكم: الستوك والأسعار والتوصيل ورقم واتساب بتيجي من الداش بورد (لو فشل بيكمل بالأرقام اللي فوق) ===== */
+fetch(API+"/api/config",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(c=>{if(!c||!c.stock||c.stock.length!==P.length)return;
+STOCK=c.stock;c.price.forEach((v,i)=>{if(v>0)P[i][2]=v});(c.fees||[]).forEach((v,i)=>{if(ZONES[i])ZONES[i].fee=v});
+if(/^\d{10,15}$/.test(c.wa||"")){WA=c.wa;Object.keys(SELLERS).forEach(k=>SELLERS[k].tel=WA)}
+const q=Object.assign({},Q);buildList();Q={};Object.keys(q).forEach(i=>set(+i,q[i]));
+const z=document.querySelector('input[name=zn][value="'+ls.get("ord-zn")+'"]');if(z)z.checked=true;
+ap();render()}).catch(()=>{});
 showOb();
 render();
 </script>
