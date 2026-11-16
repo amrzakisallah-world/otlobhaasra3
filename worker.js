@@ -30,6 +30,9 @@ if(p==="/api/admin/cfg"&&m==="POST"){const b=await req.json();
 if(!Array.isArray(b.items)||b.items.length!==SEED.items.length)return J({e:"bad"},400);
 const c={items:b.items.map((x,i)=>({b:SEED.items[i].b,n:SEED.items[i].n,l:Math.max(0,+x.l||0),q:Math.max(0,Math.floor(+x.q||0))})),disc:Math.min(90,Math.max(0,+b.disc||0)),fees:[0,1,2].map(i=>Math.max(0,+(b.fees||[])[i]||0)),wa:String(b.wa||"").replace(/\D/g,"")};
 await env.DB.put("cfg",JSON.stringify(c));return J({ok:1})}
+if(p==="/api/admin/discount"&&m==="POST"){const b=await req.json(),o=await env.DB.get(b.k,"json"),d=+b.d;
+if(!o||!(d>=0&&d<=90))return J({e:"bad"},400);
+o.disc=d;o.total=Math.round(o.items.reduce((t,[i,q,l])=>t+q*l,0)*(1-d/100));await put(env,o);return J({ok:1,total:o.total})}
 if(p==="/api/admin/status"&&m==="POST"){const b=await req.json();
 const o=await env.DB.get(b.k,"json");if(!o||!["new","confirmed","delivered","cancelled"].includes(b.s))return J({e:"bad"},400);
 const c=await cfg(env),was=o.status,to=b.s;
