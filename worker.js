@@ -6,7 +6,7 @@ const live=x=>x==="confirmed"||x==="delivered";
 const cfg=async e=>(await e.DB.get("cfg","json"))||SEED;
 const cost=(c,i)=>Math.round(c.items[i].l*(1-c.disc/100));
 const put=(e,o)=>e.DB.put(o.k,JSON.stringify(o),{metadata:{t:o.t,s:o.status,n:o.name,tot:o.total,id:o.id,cost:o.cost||0}});
-const tot=o=>Math.round(o.items.reduce((t,[i,q,l])=>t+q*l,0)*(1-(o.disc||0)/100))+(o.extra||[]).reduce((t,x)=>t+x.q*x.p,0);
+const tot=o=>{const d=1-(o.disc||0)/100;return Math.round(o.items.reduce((t,[i,q,l])=>t+q*l,0)*d+(o.extra||[]).reduce((t,x)=>t+x.q*x.p*(x.nd?1:d),0))};
 const S=(x,n=300)=>String(x||"").slice(0,n);
 export default{async fetch(req,env){
 const u=new URL(req.url),p=u.pathname,m=req.method;
@@ -45,7 +45,7 @@ if(b.i!=null&&b.i!==""){const c=await cfg(env),i=+b.i;if(!c.items[i])return J({e
 if(live(o.status)){if(c.items[i].q<q)return J({e:"stock",n:c.items[i].n},409);c.items[i].q-=q;o.cost=(o.cost||0)+q*cost(c,i);await env.DB.put("cfg",JSON.stringify(c))}
 const ex=o.items.find(x=>x[0]===i);if(ex)ex[1]+=q;else o.items.push([i,q,c.items[i].l])}
 else{const n=S(b.n,80);if(!n)return J({e:"bad"},400);const pp=Math.max(0,+b.p||0),cc=Math.max(0,+b.c||0);
-(o.extra=o.extra||[]).push({n,b:S(b.b,40),q,p:pp,c:cc});if(live(o.status))o.cost=(o.cost||0)+q*cc}
+(o.extra=o.extra||[]).push({n,b:S(b.b,40),q,p:pp,c:cc,nd:!!b.nd});if(live(o.status))o.cost=(o.cost||0)+q*cc}
 o.total=tot(o);await put(env,o);return J({ok:1,total:o.total})}
 if(p==="/api/admin/rm"&&m==="POST"){const b=await req.json(),o=await env.DB.get(b.k,"json");
 if(!o||o.items.length+(o.extra||[]).length<2)return J({e:"bad"},400);
